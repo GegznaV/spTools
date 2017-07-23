@@ -1,0 +1,34 @@
+Package: spTools
+Type: Package
+Title: Pagalbinės funkcijos
+Version: 0.0.1
+Date: 2017-05-14
+Authors@R: person("Vilmantas", "Gegzna",
+                    email = "GegznaV@gmail.com",
+                    role = c("aut", "cre","cph")
+            )
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends:
+    knitr,
+    magrittr,
+    signal,
+    hyperSpec,
+    gridExtra,
+    plyr,
+    magrittr,
+    pander,
+    htmltools,
+    knitrContainer,
+    spHelper,
+    spMisc,
+    spPlot,
+    imager,
+    abind,
+    EBImage,
+    ggplot2,
+    plotly,
+    tidyr,
+    dplyr
+RoxygenNote: 6.0.1

@@ -1,0 +1,51 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+***
+
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/spTools)](https://cran.r-project.org/package=spTools)
+[![GitHub version](https://img.shields.io/badge/GitHub-`r packageVersion("spTools")`-brightgreen.svg)](https://github.com/GegznaV/spTools)
+<!--[![Travis-CI Build Status](https://travis-ci.org/GegznaV/spTools.png?branch=master)](https://travis-ci.org/GegznaV/spTools)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Rdoc](http://www.rdocumentation.org/badges/version/spTools)](http://www.rdocumentation.org/packages/spTools)-->
+[![Last-update](https://img.shields.io/badge/Updated%20on-`r gsub('-', '--', Sys.Date())`-yellowgreen.svg)](/commits/master)
+
+
+
+
+```{r, fig.align='center', out.height='30%', out.width='30%',echo=FALSE}
+knitr::include_graphics("https://raw.githubusercontent.com/GegznaV/spTools/master/docs/logo.png")
+```
+   
+R package `spTools`
+====================
+
+Package `spTools` is under construction
+
+Install package
+---------------------------
+
+Install development version from GitHub (`devtools` mus be installed):
+```{r Install package from GitHub, eval=FALSE}
+devtools::install_github("GegznaV/spTools")
+```
+
+
+***
+
+<!-- More information at http://gegznav.github.io/spTools/ -->
+
+<!-- *** -->
+
+
