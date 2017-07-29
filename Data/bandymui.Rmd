@@ -1,0 +1,169 @@
+---
+title: "Analizė"
+subtitle: "Mėginių spalvos / Color"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+Sys.setlocale(locale = "Lithuanian")
+library(knitrContainer)
+library(spHelper)
+library(spPlot)
+library(spTools)
+library(data.table)
+library(hyperSpec)
+
+theme_set(theme_bw())
+```
+```{r}
+# dir("~/R/spTools/Data/")
+```
+
+```{r}
+# load("~/R/spTools/Data/Sp_deriv_USB2000.Rdata")
+# saveRDS(Spectra, "~/R/spTools/Data/Sp_deriv_USB2000.rds")
+
+Spectra  <- readRDS("~/R/spTools/Data/Sp_deriv_USB2000.rds") [, , min ~ 700]
+Spectra0 <- readRDS("~/R/spTools/Data/Sp_normal_USB2000.rds")[, , min ~ 700]
+
+container <- knitrContainer()
+
+# Settings
+k_folds = 3
+times   = 10
+
+variables_to_analyze <-
+    c(
+        # "Batch",
+
+         # "CitoGr"
+        # , "Hybrid_normal"
+        # , "Hybrid_cervicitis"
+        # , "Hybrid_cin3_cis"
+
+        # ,"HistGr"
+        # ,"HistGr1",
+         # "HistGr2"
+
+        "Color"
+        # , "HPV_16", "HPV_hr", "p16_Ki67"
+        # , "age_gr",     "Sediment_size2"
+    )
+```
+
+```{r}
+# Var <- "p16_Ki67"
+# Var <- "HistGr2"
+i <- 1
+
+# for (i in seq_along(variables_to_analyze)) {
+```
+```{r}  
+Var <- variables_to_analyze[i]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# message(sprintf("Cycle: % 2g\t Variable: %s",i, Var))
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Spectra <- hyRm_palette(Spectra)
+```
+
+```{r}
+gg1 <- barplots_(Spectra, Var)
+plot(gg1)
+```
+
+```{r}
+gg6 <- qplot_spRangeMean(Spectra, by = Var, percent = 95)
+gg6
+
+lims_6 <- ggLims(gg6)
+```
+
+```{r}
+gg7 <- qplot_spRangeMean(Spectra, by = Var, percent = 50) +
+    ggLims(lims_6, expand = FALSE)
+gg7
+```
+```{r}
+container %<>% add_as_heading(labels(Spectra, Var) %++% " (" %++% Var %++% ")")
+```
+
+```{r}
+container %<>%
+    add_as_is(gg1) %>%
+    # add_as_is(ggplotly_tidy(gg4))      %>%
+    # add_as_is(ggplotly_tidy(gg5))      %>%
+    add_as_is(ggplotly_tidy(gg6))      %>%
+    add_as_is(ggplotly_tidy(gg7))      %>%
+    # add_as_is(ggplotly_tidy(gg2))      %>%
+    # add_as_is(ggplotly_tidy(gg3))      %>%
+    # add_as_is(ggplotly_tidy(p2_BCSC))  %>%
+    add_as_heading2("ROC analysis" )   %>%
+    add_as_text("ROC analysis with **"     %++%
+                    times %++% " times** repeated **" %++%
+                    k_folds %++% "-fold** cross-vaidation.")
+```
+
+```{r, results="asis"}
+cont4 <- tryCatch(
+    (rez <- ROC_with_cv(Spectra,
+                    Var,
+                    k = k_folds,
+                    times = times,
+                    range_percent = 95)
+     )$plot,
+
+    error   = function(x) '**Grafiko "Se-Sp plot" nebuvo galima nubraižyti**',
+    finally = function(x) '**Grafiko "Se-Sp plot" nebuvo galima nubraižyti**'
+)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ # cutoffs_plot(rez$object) %>% print_all()
+```
+
+```{r, results="asis"}
+container %<>% Join(as.knitrContainer(cont4), cutoffs_plot(rez$object))
+# print_all(cont4)
+print_all(container)
+```
+
+```{r}
+# rm(gg1, gg2, gg3, gg4, gg5, p2_BCSC, cont4)
+gc()
+# }
+```
+
+```{r}
+# container
+```
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+
+<!-- ```{r} -->
+<!-- gg2    <- qplot_spRange(Spectra, Var, percent = 95) -->
+<!-- lims_2 <- ggLims(gg2) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gg3 <- qplot_spRange(Spectra, Var, percent = 50) + -->
+<!--     ggLims(lims_2, expand = FALSE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gg4 <- qplot_spStat(Spectra, Var, median) + -->
+<!--     ggLims(lims_2, expand = FALSE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gg5 <- qplot_spStat(Spectra, Var, mad, "Median absolute deviation") + -->
+<!--     ggLims(lims_2, expand = FALSE) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- meanTr <- function(x) mean(x, trim = .05) -->
+<!-- CSCb <- center_subtracted_centers(Spectra, Var, meanTr, balanced = T) -->
+<!-- p2_BCSC <- qplot_sp(CSCb, names.in = Var) + -->
+<!--     ggtitle("Balanced mean subtracted group means") + -->
+<!--     ggLims(lims_2[2] * c(-1, 1)/4, expand = FALSE) -->
+<!-- ``` -->
+

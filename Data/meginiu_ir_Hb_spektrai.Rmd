@@ -1,0 +1,241 @@
+---
+title: "Analizė – spektrų palyginimas pagal spalvines mėginių grupes"
+subtitle: "Mėginių spalvos / Color"
+output: 
+  html_document: 
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+Sys.setlocale(locale = "Lithuanian")
+library(knitrContainer)
+library(spHelper)
+library(spPlot)
+library(spTools)
+library(data.table)
+library(hyperSpec)
+library(cowplot)
+
+theme_set(theme_bw())
+```
+
+# Aprašymas
+
+<!-- **Palyginti baltą su geltonais**    -->
+<!-- **Normavimas -- sutampančios uodegos** -->
+
+Spektrai sunormuoti pagal vidutinį intensyvumą ir padalinti į grupes pagal spalvas. Pasirinktos 3 labiausiai besiskiriančių spalvų grupės (labiausiai balta, geltona, ir rudai raudona). Išvestas kiekvienos grupės spektrų intensyvumų vidurkis, lyginta pagal šiuos vidurkius.
+
+Spektrai palyginti su iš duomenų bazės http://www.npsg.uwaterloo.ca/data/blood.php parsisiųstais įvairaus tipo hemoglobino spektrais.
+
+# Mėginių spektrai
+```{r}
+# dir("~/R/spTools/Data/")
+```
+
+```{r}
+# load("~/R/spTools/Data/Sp_deriv_USB2000.Rdata")
+# saveRDS(Spectra, "~/R/spTools/Data/Sp_deriv_USB2000.rds")
+
+Spectra  <- readRDS("~/R/spTools/Data/Sp_deriv_USB2000.rds")[, , min ~ 700]
+Spectra0 <- readRDS("~/R/spTools/Data/Sp_normal_USB2000.rds")[, , min ~ 700]
+
+
+container <- knitrContainer()
+
+
+# Settings
+k_folds = 3
+times   = 10
+
+variables_to_analyze <-
+    c(
+        # "Batch",
+
+         # "CitoGr"
+        # , "Hybrid_normal"
+        # , "Hybrid_cervicitis"
+        # , "Hybrid_cin3_cis"
+
+        # ,"HistGr"
+        # ,"HistGr1",
+         # "HistGr2"
+
+        "Color"
+        # , "HPV_16", "HPV_hr", "p16_Ki67"
+        # , "age_gr",     "Sediment_size2"
+    )
+```
+
+```{r}
+# Var <- "p16_Ki67"
+# Var <- "HistGr2"
+i <- 1
+
+# for (i in seq_along(variables_to_analyze)) {
+```
+```{r}  
+Var <- variables_to_analyze[i]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# message(sprintf("Cycle: % 2g\t Variable: %s",i, Var))
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Spectra <- hyRm_palette(Spectra)
+```
+
+```{r}
+
+```
+
+```{r}
+sp_Whitish_hist <- 
+    # subset(Spectra0, Color == "Whitish" & !is.na(HistGr))  %>% 
+    subset(Spectra0, Color == "Whitish")  %>% 
+    mean()
+
+sp_Red_hist <- 
+    subset(Spectra0, Color == "Dark red to brownish") %>% 
+    mean()
+
+sp_yellow_hist <- 
+    subset(Spectra0, Color == "Yellow") %>% 
+    mean()
+
+
+
+sp_w_r <- sp_Whitish_hist/sp_Red_hist
+sp_w_y <- sp_Whitish_hist/sp_yellow_hist
+sp_y_r <- sp_yellow_hist/sp_Red_hist
+
+# Normalize
+max_ <- max(sp_w_r)
+
+sp_Red_hist    <- sp_Red_hist    / max_
+sp_yellow_hist <- sp_yellow_hist / max_
+sp_Whitish_hist  <- sp_Whitish_hist  / max_
+sp_w_r         <- sp_w_r / max_
+sp_w_y         <- sp_w_y / max_
+sp_y_r         <- sp_y_r / max_
+
+
+# Give names
+sp_Whitish_hist$Spectrum  <- "Mean of Whitish"
+sp_yellow_hist$Spectrum   <- "Mean of Yellow"
+sp_Red_hist$Spectrum      <- "Mean of Red-brownish"
+sp_w_r$Spectrum   <- "Ratio Whitish/Red-brownish"
+sp_w_y$Spectrum   <- "Ratio Whitish/Yellow"
+sp_y_r$Spectrum   <- "Ratio Yellow/Red-brownish"
+
+sp_specmens <- collapse(
+    sp_Whitish_hist,
+    sp_yellow_hist,
+    sp_Red_hist,
+    sp_w_r,
+    sp_w_y,
+    sp_y_r)
+
+sp_specmens$Spectrum  %<>%
+    factor(
+        c(
+        "Mean of Red-brownish",
+        "Mean of Yellow",
+        "Mean of Whitish",
+        "Ratio Whitish/Red-brownish",
+        "Ratio Whitish/Yellow",
+        "Ratio Yellow/Red-brownish"
+        ))
+
+ggs <- ggplot(sp_specmens, aes_sp(color = Spectrum)) + 
+    geom_line() +
+    ggtitle("Rudai-raudonų, geltonų ir labiausiai baltų mėginių spektrų vidurkiai")
+
+ggplotly(ggs)
+
+```
+
+# Hemoglobino spektrai
+
+```{r}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+read_spectra_txt <- function(FILE) {
+    df_hem <-  fread(FILE, data.table = FALSE)
+    
+    sp <- new("hyperSpec",
+        wavelength = df_hem$wavelength,
+        spc = df_hem$extinction,
+        labels = list(.wavelength = expression(lambda / nm),
+                      spc = "(cm^{-1}/(mol/L)")
+    )
+    sp$Spectrum <- basename(FILE) %>% sub("_extinction.txt", "", .)
+    sp
+}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+FILES <- list(
+    "D:/Dokumentai/R/Spektroskopija/Medziagu spektrai/deoxyhemoglobin_extinction.txt",
+    "D:/Dokumentai/R/Spektroskopija/Medziagu spektrai/carboxyhemoglobin_extinction.txt",
+    "D:/Dokumentai/R/Spektroskopija/Medziagu spektrai/methemoglobin_extinction.txt",
+    "D:/Dokumentai/R/Spektroskopija/Medziagu spektrai/oxyhemoglobin_extinction.txt")
+
+sp_hemo <- lapply(FILES, read_spectra_txt)  %>% collapse()
+
+
+max_hem <- apply(sp_hemo, 1, max, na.rm = TRUE)
+sp_hemo <- sweep(sp_hemo, 1, max_hem, "/")
+
+sp_hemo$Spectrum  %<>% as.factor()
+ggh <- ggplot(sp_hemo, aes_sp(color = Spectrum)) + geom_line() + ggtitle("Hemoglobino sugerties spetrai (normuoti)")
+ggplotly(ggh)
+```
+
+# Mėginių ir hemoglobino spektrai
+```{r}
+
+sp_all <- collapse(sp_hemo, sp_specmens) 
+
+LEVELS <-
+    c(
+    "Mean of Red-brownish",
+    "Mean of Yellow",
+    "Mean of Whitish",
+    "Ratio Whitish/Red-brownish",
+    "Ratio Whitish/Yellow",
+    "Ratio Yellow/Red-brownish",
+    "oxyhemoglobin",
+    "deoxyhemoglobin",    
+    "carboxyhemoglobin",
+    "methemoglobin"
+    )
+
+sp_all$Spectrum  %<>% factor(LEVELS)
+
+
+
+gg <- ggplot(sp_all, aes_sp(color = Spectrum)) + 
+    geom_line() + 
+    ggtitle("Spektrai")
+
+ggplotly(gg)
+```
+
+```{r}
+ ggplot(sp_all[sp_all$Spectrum %in% 
+                   c("oxyhemoglobin", "deoxyhemoglobin", "Ratio Whitish/Red-brownish"), ],
+        aes_sp(color = Spectrum)) + 
+    geom_line(lwd = 1) + 
+    ylab("Normalized extinction") + ggLims(c(390, 690), "x")
+```
+
+
+```{r}
+# Spectra0$Color  %>% summary()
+```
+
+
+```{r}
+gg1 <- barplots_(Spectra, Var)
+plot(gg1)
+```
