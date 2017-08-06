@@ -11,14 +11,22 @@
 
 #' sp_manyroc_cv_by_variable
 #'
+#' @param Spectra hyperSpec object
+#' @param variables_to_analyze Character list
+#' @param k_folds positive integer
+#' @param times positive integer
+#' @param seeds NULL | vector of integers
+#'
 #' @export
 #'
 #' @examples
 #' sp_manyroc_cv_by_variable(Spectra2, "gr")
-roc_manyroc_cv_by_variable <- function(Spectra,
+sp_manyroc_cv_by_variable <- function(Spectra,
                                         variables_to_analyze,
                                         k_folds = 3,
-                                        times = 10) {
+                                        times = 10,
+                                        seeds = 2222222
+                                       ) {
 # -----------------------------------------------------------------------------
     if (!checkmate::test_named(variables_to_analyze))
         names(variables_to_analyze) <- variables_to_analyze
@@ -27,7 +35,8 @@ roc_manyroc_cv_by_variable <- function(Spectra,
                                        purrr::safely(sp_roc_with_cv_3),
                                        Spectra_gr = Spectra,
                                        k = k_folds,
-                                       times = times)
+                                       times = times,
+                                       seeds = seeds)
 # -----------------------------------------------------------------------------
     not_error <- purrr::map_lgl(rez_tmp, ~is.null(.x$error))
     t_tez <- purrr::transpose(rez_tmp)
@@ -36,16 +45,33 @@ roc_manyroc_cv_by_variable <- function(Spectra,
     names(rez_not_err) <- purrr::map_chr(rez_not_err, ~.x$variable)
     rez_final <- purrr::transpose(rez_not_err)
 
-    rez_final$rezults <- dplyr::bind_rows(rez_final$rezults, .id = "grouping")
+    rez_final$cvo %<>%
+        add_class_label("hide_it")
 
-    rez_final$ind_included_rows %<>% as.data.frame() %>% add_class_label("roc_df")
-    rez_final$n_included %<>% dplyr::bind_cols() %>% as.data.frame()
+    rez_final$rezults <-
+        dplyr::bind_rows(rez_final$rezults, .id = "grouping")
 
-    rez_final$variables_included <- rez_final$variable %>% purrr::reduce(c)
+    rez_final$ind_included_rows %<>%
+        as.data.frame() %>%
+        add_class_label("roc_df")
+
+    rez_final$n_included %<>%
+        dplyr::bind_cols() %>%
+        as.data.frame()
+
+    rez_final$variables_included <-
+        rez_final$variable %>%
+        purrr::reduce(c)
+
     rez_final$variables_errored <-
-        variables_to_analyze[!not_error] %>% remove_names()
+        variables_to_analyze[!not_error] %>%
+        remove_names()
 
-    rez_final$error_messages <- t_tez$error
+    rez_final$variable
+
+    rez_final$error_messages <-
+        add_class_label(t_tez$error, "hide_it")
+
 # -----------------------------------------------------------------------------
     rez_final
 
@@ -60,6 +86,8 @@ remove_names <- function(x) {
 # =============================================================================
 # Spectra_gr <- Spectra
 # Var <- "CitoGr"
+#' @rdname sp_manyroc_cv_by_variable
+#' @export
 sp_roc_with_cv_3 <-
     function(Var,
              Spectra_gr,
@@ -73,13 +101,13 @@ sp_roc_with_cv_3 <-
         # Remove rows with NA values and with groups which have too few samples in
         # that group
 
-        var_values    <- get_var_values(Var, Spectra_gr)
+        var_values         <- get_var_values(Var, Spectra_gr)
 
-        too_few_in_gr <- has_too_few_IDs(Spectra_gr, Var, n_min = n_min)
-        ind_too_few   <- var_values %in% too_few_in_gr
-        ind_NA        <- is.na(var_values)
+        too_few_in_gr      <- has_too_few_IDs(Spectra_gr, Var, n_min = n_min)
+        ind_too_few        <- var_values %in% too_few_in_gr
+        ind_NA             <- is.na(var_values)
         ind_included_rows  <- !ind_NA & !ind_too_few
-        Spectra_gr    <- Spectra_gr[ind_included_rows, ]
+        Spectra_gr         <- Spectra_gr[ind_included_rows, ]
 
         # Drop unnecessary levels
         eval_glue("Spectra_gr${Var} %<>% droplevels()")
@@ -96,12 +124,15 @@ sp_roc_with_cv_3 <-
         x  <- Spectra_gr[[]]
         gr <- Spectra_gr[[,Var, drop = TRUE]]
 
-        roc_rez <- roc_manyroc_cv(x = x, gr = gr, optimize_by = "bac", cvo = cvo)
+        roc_rez <- roc_manyroc_cv(x = x,
+                                   gr = gr,
+                                   optimize_by = "bac",
+                                   cvo = cvo)
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         list(variable = Var,
              n_included = sum(ind_included_rows),
-             ind_included_rows = add_class_label(ind_included, "as_str"),
+             ind_included_rows = add_class_label(ind_included_rows, "as_str"),
              # x  = add_class_label(x, "as_str"),
              # gr = add_class_label(gr, "as_str"),
              cvo = cvo,
@@ -109,6 +140,18 @@ sp_roc_with_cv_3 <-
              rezults = add_class_label(roc_rez, "roc_df"))
     }
 
+
+# -----------------------------------------------------------------------------
+#' @rdname sp_manyroc_cv_by_variable
+#' @export
+#' @method print hide_it
+print.hide_it <- function(x, ...) {
+        cat("***       First non-empty element:     ***\n")
+    ind <- purrr::map_lgl(x, ~!is.null(.x)) %>% which()  %>% .[1]
+    print(x[[ind]])
+    if (length(x) > 1)
+        cat("\n*** Other elements are not displayed ***\n\n")
+}
 # =============================================================================
 # library(parallelMap)
 #

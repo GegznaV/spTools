@@ -1,8 +1,8 @@
 Package: spTools
 Type: Package
 Title: Pagalbinės funkcijos
-Version: 0.0.1
-Date: 2017-05-14
+Version: 0.0.2
+Date: 2017-08-04
 Authors@R: person("Vilmantas", "Gegzna",
                     email = "GegznaV@gmail.com",
                     role = c("aut", "cre","cph")
@@ -11,13 +11,13 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Depends:
+    manyROC,
     knitr,
     magrittr,
     signal,
     hyperSpec,
     gridExtra,
     plyr,
-    magrittr,
     pander,
     htmltools,
     knitrContainer,
@@ -29,6 +29,9 @@ Depends:
     EBImage,
     ggplot2,
     plotly,
+    purrr,
+    magrittr,
+    tibble,
     tidyr,
     dplyr,
     glue
