@@ -45,6 +45,7 @@ sp_manyroc_cv_by_variable <- function(Spectra,
     names(rez_not_err) <- purrr::map_chr(rez_not_err, ~.x$variable)
     rez_final <- purrr::transpose(rez_not_err)
 
+
     rez_final$cvo %<>%
         add_class_label("hide_it")
 
@@ -146,11 +147,11 @@ sp_roc_with_cv_3 <-
 #' @export
 #' @method print hide_it
 print.hide_it <- function(x, ...) {
-        cat("***       First non-empty element:     ***\n")
+        cat("*** First non-empty element: ***\n")
     ind <- purrr::map_lgl(x, ~!is.null(.x)) %>% which()  %>% .[1]
     print(x[[ind]])
     if (length(x) > 1)
-        cat("\n*** Other elements are not displayed ***\n\n")
+        cat("\n*** Other elements are not shown ***\n\n")
 }
 # =============================================================================
 # library(parallelMap)

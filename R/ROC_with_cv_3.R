@@ -36,7 +36,7 @@ roc_manyroc_cv_by_variable <- function(Spectra,
     names(rez_not_err) <- purrr::map_chr(rez_not_err, ~.x$variable)
     rez_final <- purrr::transpose(rez_not_err)
 
-    rez_final$rezults <- dplyr::bind_rows(rez_final$rezults, .id = "grouping")
+    rez_final$results <- dplyr::bind_rows(rez_final$results, .id = "grouping")
 
     rez_final$ind_included_rows %<>% as.data.frame() %>% add_class_label("roc_df")
     rez_final$n_included %<>% dplyr::bind_cols() %>% as.data.frame()
@@ -106,7 +106,7 @@ sp_roc_with_cv_3 <-
              # gr = add_class_label(gr, "as_str"),
              cvo = cvo,
 
-             rezults = add_class_label(roc_rez, "roc_df"))
+             results = add_class_label(roc_rez, "roc_df"))
     }
 
 # =============================================================================
