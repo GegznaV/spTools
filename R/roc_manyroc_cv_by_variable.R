@@ -99,7 +99,7 @@
 #'         # spectra_mat_gr    <- spectra_mat_gr[ind_included_rows, ]
 #'         #
 #'         # # Drop unnecessary levels
-#'         # eval_glue("spectra_mat_gr${Var_df} %<>% droplevels()")
+#'         # eval_glue("spectra_mat_gr$`{Var_df}` %<>% droplevels()")
 #'         # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #'         # # Make a cross-validation object
 #'         # cvo <- cvo_create_folds(spectra_mat_gr,

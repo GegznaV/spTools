@@ -82,7 +82,7 @@ sp_roc_with_cv_3 <-
         Spectra_gr    <- Spectra_gr[ind_included_rows, ]
 
         # Drop unnecessary levels
-        eval_glue("Spectra_gr${Var} %<>% droplevels()")
+        eval_glue("Spectra_gr$`{Var}` %<>% droplevels()")
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Make a cross-validation object
         cvo <- cvo_create_folds(Spectra_gr,
