@@ -5,7 +5,8 @@
 \alias{gg_barplot}
 \title{barplots_}
 \usage{
-barplots_(Spectra, gr = "HistGr", ID = "ID", alpha = 1)
+barplots_(Spectra, gr = "HistGr", ID = "ID", alpha = 1,
+  title_id = "Specimens", tilte_sp = "Spectra")
 
 gg_barplot(Spectra, gr = "HistGr", alpha = 1)
 }

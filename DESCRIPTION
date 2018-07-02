@@ -1,8 +1,8 @@
 Package: spTools
 Type: Package
 Title: Pagalbinės funkcijos
-Version: 0.0.2
-Date: 2017-08-04
+Version: 0.0.3
+Date: 2018-07-02
 Authors@R: person("Vilmantas", "Gegzna",
                     email = "GegznaV@gmail.com",
                     role = c("aut", "cre","cph")

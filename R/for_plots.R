@@ -144,17 +144,18 @@ sub_plot_means <- function(obj){
 #'
 #' @examples
 #'
-barplots_ <- function(Spectra, gr = "HistGr", ID = "ID", alpha = 1){
+barplots_ <- function(Spectra, gr = "HistGr", ID = "ID", alpha = 1,
+                      title_id = "Specimens", tilte_sp = "Spectra"){
 
     Spectra$ID <- getVarValues(ID, Spectra)
-    bp1 <- gg_barplot(Spectra, gr) +
-        labs(y = "Number of spectra", title = "Spectra") + x30()
+    bp1 <- gg_barplot(Spectra, gr, alpha = .5) +
+        labs(y = "Number of spectra", title = tilte_sp) + x30()
     LIMS <- c(ggLims(bp1, "x"), 0, ggLims(bp1)[2])
     bp1 <- bp1 + ggLims(LIMS)
 
     bp2 <-
-        gg_barplot(Spectra[!duplicated(Spectra$ID)], gr,  .5) +
-        labs(y = "Number of specimens", title = "Samples") +
+        gg_barplot(Spectra[!duplicated(Spectra$ID)], gr, alpha = 1) +
+        labs(y = "Number of specimens", title = title_id) +
         ggLims(LIMS, expand = FALSE) +
         x30()
 
@@ -163,7 +164,7 @@ barplots_ <- function(Spectra, gr = "HistGr", ID = "ID", alpha = 1){
     # gg <- subplot(bp1, bp2, nrow = 1, shareY = TRUE)  %>%
         # plotly_tidy()
 
-    gg <- cowplot::plot_grid(bp1, bp2,
+    gg <- cowplot::plot_grid(bp2, bp1,
                              nrow = 1,
                              align = "h")
 
